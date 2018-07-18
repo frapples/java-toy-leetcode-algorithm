@@ -1,5 +1,6 @@
 package io.github.frapples.algorithm.leetcode.medium0033_LongestSubstringWithoutRepeatingCharacters;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -18,7 +19,14 @@ import java.util.HashSet;
  */
 class Solution {
 
-    /**
+    /** 首先想到的方案是：设i从0到N - 1遍历，计算从i开始的不重复子串的最大长度。时间复杂度为O(N^2)
+     * 这里采用的一种剪枝策略：
+     * 1. 假设发现字串[i, j)是i开始的最长不重复子串
+     * 2. 那么[i, j + 1)一定不是不重复子串
+     * 3. 那么当搜索以i - 1开始的最长不重复字串时，只需要搜索到[i - 1, j)这个区间就可以了。
+     *
+     * 不过这个剪枝似乎作用不太大。。。
+     *
      * 77ms 16.43%
      */
     public int lengthOfLongestSubstring(String s) {
@@ -36,6 +44,47 @@ class Solution {
             }
             maxLength = Math.max(maxLength, j - i);
             findedRight = j;
+        }
+        return maxLength;
+    }
+
+    /**
+     * 前面思路是i从0到N - 1遍历，计算从i开始的最大不重复字串。
+     * 那能否通过i + 1的某些结果，直接推导出i的结果？
+     * 如果i + 1的结果为[i + 1, j)，那么i情况的结果为：
+     *  1. 如果s[i]不出现在[i + 1, j)中，那么结果为[i, j)
+     *  2. 如果s[i]出现在[i + 1, j)中，显然只出现一次，索引为k。那么结果为[i, k)
+     *  最后需要一个map来存储情况i的结果中，字符到索引的映射
+     *
+     *  最终的时间复杂度为O(N)
+     * 33ms 93.12%
+     */
+    public int lengthOfLongestSubstring2(String s) {
+        if (s.isEmpty()) {
+            return 0;
+        }
+        HashMap<Character, Integer> cache = new HashMap<>();
+        int[] ends = new int[s.length()];
+
+        ends[s.length() - 1] = s.length();
+        cache.put(s.charAt(s.length() - 1), s.length() - 1);
+
+        for (int i = s.length() - 2; i >= 0; i--) {
+            if (cache.containsKey(s.charAt(i))) {
+                ends[i] = cache.get(s.charAt(i));
+            } else {
+                ends[i] = ends[i + 1];
+            }
+            // 仔细分析不难发现该循环次数累加起来总共不超过N次
+            for (int j = ends[i]; j < ends[i + 1]; j++) {
+                cache.remove(s.charAt(j));
+            }
+            cache.put(s.charAt(i), i);
+        }
+
+        int maxLength = 0;
+        for (int i = 0; i < ends.length; i++) {
+            maxLength = Math.max(maxLength, ends[i] - i);
         }
         return maxLength;
     }
