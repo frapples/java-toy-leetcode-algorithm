@@ -1,4 +1,4 @@
-package io.github.frapples.algorithm.leetcode.medium0033_LongestSubstringWithoutRepeatingCharacters;
+package io.github.frapples.algorithm.leetcode.medium003_LongestSubstringWithoutRepeatingCharacters;
 
 import java.util.HashMap;
 import java.util.HashSet;
